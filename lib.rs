@@ -112,7 +112,7 @@ pub fn element(_args: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
             fn type_id(&self) -> TypeId {
-                TypeId::of::<Button>()
+                std::any::TypeId::of::<Button>()
             }
         }
     };
