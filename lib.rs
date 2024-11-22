@@ -81,10 +81,13 @@ pub fn element(_args: TokenStream, input: TokenStream) -> TokenStream {
                 }
             }
             fn get_element_by_id(&mut self, id: &str) -> Option<&mut Element> {
+                if self.id == id {
+                    return Some(self);
+                }
                 if let Children::Children(children, _) = &mut self.children {
                     for elem in children {
-                        if elem.get_data().2 == id {
-                            return Some(elem);
+                        if let Some(e) elem.get_element_by_id(id) {
+                            return Some(e);
                         }
                     }
                 }
