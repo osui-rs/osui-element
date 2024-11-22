@@ -1,6 +1,6 @@
 [package]
 name = "osui-element"
-version = "0.1.6"
+version = "0.1.7"
 edition = "2021"
 description = "The element attribute for defining elements in OSUI"
 license = "Apache-2.0"

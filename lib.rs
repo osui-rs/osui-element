@@ -86,7 +86,7 @@ pub fn element(_args: TokenStream, input: TokenStream) -> TokenStream {
                 }
                 if let Children::Children(children, _) = &mut self.children {
                     for elem in children {
-                        if let Some(e) elem.get_element_by_id(id) {
+                        if let Some(e) = elem.get_element_by_id(id) {
                             return Some(e);
                         }
                     }
