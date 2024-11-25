@@ -1,6 +1,6 @@
 [package]
 name = "osui-element"
-version = "0.1.9"
+version = "0.1.8"
 edition = "2021"
 description = "The element attribute for defining elements in OSUI"
 license = "Apache-2.0"
@@ -8,6 +8,10 @@ license = "Apache-2.0"
 [lib]
 proc-macro = true
 path = "./lib.rs"
+
+[[bin]]
+name = "osui-test"
+path = "./main.rs"
 
 [dependencies]
 proc-macro2 = "1.0.89"
