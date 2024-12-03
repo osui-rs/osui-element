@@ -89,6 +89,10 @@ pub fn element(_args: TokenStream, input: TokenStream) -> TokenStream {
                 fn get_id(&self) -> String {
                     self.id.to_string()
                 }
+
+                fn get_style(&self) -> &Style {
+                    &self.style
+                }
             }
         }
     } else {
