@@ -141,14 +141,14 @@ pub fn component(_args: TokenStream, input: TokenStream) -> TokenStream {
     });
 
     let expanded = quote! {
-        #[derive(Debug)]
+        #[derive(Debug, Default)]
         #[allow(non_camel_case_types)]
         #visibility struct #fn_name {
             #(#struct_fields),*
         }
 
-        impl #fn_name {
-            pub fn create_element(&self) -> #return_type {
+        impl Component for #fn_name {
+            fn create_element(&self) -> #return_type {
                 #code
             }
         }
