@@ -1,7 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse::Parser, parse_macro_input, DeriveInput, Fields, GenericParam, Lifetime, LifetimeParam,
+    parse::Parser, parse_macro_input, DeriveInput, Fields, GenericParam, ItemFn, Lifetime,
+    LifetimeParam,
 };
 
 #[proc_macro_attribute]
@@ -111,4 +112,47 @@ pub fn elem_fn(_args: TokenStream, input: TokenStream) -> TokenStream {
     };
 
     expanded.into()
+}
+
+#[proc_macro_attribute]
+pub fn component(_args: TokenStream, input: TokenStream) -> TokenStream {
+    let input_fn = parse_macro_input!(input as ItemFn);
+
+    let fn_name = input_fn.sig.ident.clone();
+    let code = input_fn.block;
+    let visibility = input_fn.vis;
+    let return_type = match input_fn.sig.output {
+        syn::ReturnType::Default => syn::parse_quote! { Element },
+        syn::ReturnType::Type(_, t) => t,
+    };
+
+    let struct_fields = input_fn.sig.inputs.iter().filter_map(|arg| {
+        if let syn::FnArg::Typed(pat_type) = arg {
+            if let syn::Pat::Ident(pat_ident) = *pat_type.pat.clone() {
+                let field_name = pat_ident.ident;
+                let field_type = pat_type.ty.clone();
+                Some(quote! { pub #field_name: #field_type })
+            } else {
+                None
+            }
+        } else {
+            None
+        }
+    });
+
+    let expanded = quote! {
+        #[derive(Debug)]
+        #[allow(non_camel_case_types)]
+        #visibility struct #fn_name {
+            #(#struct_fields),*
+        }
+
+        impl #fn_name {
+            pub fn create_element(&self) -> #return_type {
+                #code
+            }
+        }
+    };
+
+    TokenStream::from(expanded)
 }
