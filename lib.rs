@@ -90,7 +90,7 @@ pub fn element(_args: TokenStream, input: TokenStream) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn component(_args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn component(_: TokenStream, input: TokenStream) -> TokenStream {
     let input_fn = parse_macro_input!(input as ItemFn);
 
     let fn_name = input_fn.sig.ident.clone();
@@ -135,7 +135,8 @@ pub fn component(_args: TokenStream, input: TokenStream) -> TokenStream {
         }
 
         impl <#(#lifetimes),*> Component for #fn_name <#(#lifetimes),*> {
-            fn create_element(self) -> #return_type {
+            type Element = #return_type;
+            fn create_element(self) -> Self::Element {
                 #code
             }
         }
