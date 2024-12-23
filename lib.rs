@@ -134,7 +134,7 @@ pub fn component(_args: TokenStream, input: TokenStream) -> TokenStream {
             #(#struct_fields),*
         }
 
-        impl #lifetime #fn_name #lifetime {
+        impl#lifetime Component for #lifetime #fn_name #lifetime {
             fn create_element(self) -> #return_type {
                 #code
             }
