@@ -1,9 +1,8 @@
 use proc_macro::TokenStream;
-use proc_macro2::Span;
 use quote::quote;
 use syn::{
-    parse::Parser, parse_macro_input, DeriveInput, FnArg, ItemFn, Lifetime, LifetimeParam,
-    PatIdent, PatType, Type, TypeReference,
+    parse::Parser, parse_macro_input, DeriveInput, FnArg, GenericParam, ItemFn, Lifetime,
+    LifetimeParam, PatIdent, PatType,
 };
 
 #[proc_macro_attribute]
@@ -101,7 +100,20 @@ pub fn component(_args: TokenStream, input: TokenStream) -> TokenStream {
         syn::ReturnType::Default => syn::parse_quote! { Element },
         syn::ReturnType::Type(_, t) => t,
     };
-    let mut fn_lifetime = false;
+
+    let lifetimes: Vec<_> = input_fn
+        .sig
+        .generics
+        .params
+        .iter()
+        .filter_map(|param| {
+            if let GenericParam::Lifetime(lifetime) = param {
+                Some(&lifetime.lifetime)
+            } else {
+                None
+            }
+        })
+        .collect();
 
     let mut struct_fields = Vec::new();
 
@@ -109,32 +121,20 @@ pub fn component(_args: TokenStream, input: TokenStream) -> TokenStream {
         if let FnArg::Typed(PatType { pat, ty, .. }) = arg {
             if let syn::Pat::Ident(PatIdent { ident, .. }) = &**pat {
                 let field_name = ident.clone();
-                let mut field_type = *(ty.clone());
-
-                if let Type::Reference(TypeReference { lifetime, .. }) = &mut field_type {
-                    fn_lifetime = true;
-                    *lifetime = Some(Lifetime::new("'a", Span::call_site()));
-                }
-
+                let field_type = ty.clone();
                 struct_fields.push(quote! { pub #field_name: #field_type });
             }
         }
     }
 
-    let lifetime = if fn_lifetime {
-        quote! {<'a>}
-    } else {
-        quote! {}
-    };
-
     let expanded = quote! {
         #[derive(Debug, Default)]
         #[allow(non_camel_case_types)]
-        #visibility struct #fn_name #lifetime {
+        #visibility struct #fn_name<#(#lifetimes),*> {
             #(#struct_fields),*
         }
 
-        impl #lifetime Component for #lifetime #fn_name #lifetime {
+        impl <#(#lifetimes),*> Component for #fn_name <#(#lifetimes),*> {
             fn create_element(self) -> #return_type {
                 #code
             }
