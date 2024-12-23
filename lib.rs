@@ -1,8 +1,8 @@
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{
-    parse::Parser, parse_macro_input, DeriveInput, Fields, GenericParam, ItemFn, Lifetime,
-    LifetimeParam,
+    parse::Parser, parse_macro_input, DeriveInput, Fields, GenericParam, ItemFn,
+    Lifetime, LifetimeParam,
 };
 
 #[proc_macro_attribute]
@@ -85,30 +85,6 @@ pub fn element(_args: TokenStream, input: TokenStream) -> TokenStream {
     let expanded = quote! {
         #ast
         #impl_block
-    };
-
-    expanded.into()
-}
-
-#[proc_macro_attribute]
-pub fn elem_fn(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let ast = parse_macro_input!(input as DeriveInput);
-    let struct_name = &ast.ident;
-
-    let func_name = syn::Ident::new(
-        &struct_name.to_string().to_lowercase(),
-        proc_macro2::Span::call_site(),
-    );
-
-    let elem_fn = quote! {
-        pub fn #func_name<'a>() -> Box<#struct_name<'a>> {
-            Box::new(#struct_name::default())
-        }
-    };
-
-    let expanded = quote! {
-        #ast
-        #elem_fn
     };
 
     expanded.into()
